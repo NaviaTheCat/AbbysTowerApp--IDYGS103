@@ -138,7 +138,7 @@ private fun DetailContent(personaje: Personaje) {
         Text(
             text = "Descripción del personaje",
             color = GoldSoft,
-            fontFamily = FontFamily.Serif,   // luego Cinzel
+            fontFamily = FontFamily.Serif,
             fontSize = 20.sp,
             modifier = Modifier.align(Alignment.Start)
         )

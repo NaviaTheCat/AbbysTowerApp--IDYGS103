@@ -59,7 +59,7 @@ fun LoadScreen(onFinished: () -> Unit) {
         Image(
             painter = painterResource(id = R.drawable.fondo_principal),
             contentDescription = null,
-            contentScale = ContentScale.Crop,   // llena toda la pantalla sin deformarse
+            contentScale = ContentScale.Crop,
             alpha = PRINCIPAL_ALPHA,
             modifier = Modifier.fillMaxSize()
         )

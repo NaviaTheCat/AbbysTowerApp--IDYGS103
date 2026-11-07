@@ -68,9 +68,9 @@ fun CharactersScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundColor)            // 1) color base
+            .background(BackgroundColor)
     ) {
-        // 2) Imagen de fondo
+
         Image(
             painter = painterResource(id = R.drawable.fondo_secundario),
             contentDescription = null,
@@ -79,13 +79,13 @@ fun CharactersScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 3) Contenido
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            // Barra superior: regresar + título
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +116,7 @@ fun CharactersScreen(
                 )
             }
 
-            // Buscador + botón Filtrar
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -135,7 +135,6 @@ fun CharactersScreen(
                 )
             }
 
-            // Resultados
             if (characters.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Sin resultados", color = GoldSoft, fontSize = 16.sp)
@@ -159,7 +158,7 @@ fun CharactersScreen(
             }
         }
 
-        // 4) Ventana de filtros
+
         if (mostrarFiltro) {
             FiltroDialog(
                 filtroActual = filtro,

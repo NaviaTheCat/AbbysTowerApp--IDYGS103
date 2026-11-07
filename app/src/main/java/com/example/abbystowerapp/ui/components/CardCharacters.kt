@@ -40,10 +40,10 @@ fun CardCharacters(
 
     Box(
         modifier = modifier
-            .aspectRatio(690f / 580f)          // proporción del PNG del marco
+            .aspectRatio(690f / 580f)
             .clickable(onClick = onClick)
     ) {
-        // 1) Fondo oscuro dentro del marco
+
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -65,7 +65,7 @@ fun CardCharacters(
                 }
         )
 
-        // 2) Personaje (pixel art nítido)
+
         Image(
             bitmap = character,
             contentDescription = name,
@@ -76,7 +76,7 @@ fun CardCharacters(
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         )
 
-        // 3) Sombra suave detrás del nombre para que se lea
+
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -90,7 +90,7 @@ fun CardCharacters(
                 )
         )
 
-        // 4) Nombre
+
         Text(
             text = name,
             color = Color.White,
@@ -102,7 +102,7 @@ fun CardCharacters(
                 .padding(bottom = 14.dp)
         )
 
-        // 5) Marco encima de todo (incluye la insignia de la esquina)
+
         Image(
             bitmap = frame,
             contentDescription = null,

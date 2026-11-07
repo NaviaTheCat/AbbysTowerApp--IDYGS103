@@ -92,7 +92,7 @@ private fun PixelFrame(
                 val w = size.width.toInt()
                 val h = size.height.toInt()
 
-                // 1) Fondo/degradado solo dentro del hueco del marco
+
                 if (innerBrush != null) {
                     val inset = d * 0.6f
                     drawRect(
@@ -115,7 +115,7 @@ private fun PixelFrame(
                             srcSize = IntSize(sx[i + 1] - sx[i], sy[j + 1] - sy[j]),
                             dstOffset = IntOffset(dx[i], dy[j]),
                             dstSize = IntSize(dx[i + 1] - dx[i], dy[j + 1] - dy[j]),
-                            filterQuality = FilterQuality.None   // pixel art nítido
+                            filterQuality = FilterQuality.None
                         )
                     }
                 }
@@ -138,9 +138,9 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(HomeBackgroundColor)          // 1) color base
+            .background(HomeBackgroundColor)
     ) {
-        // 2) Imagen de fondo, de borde a borde
+
         Image(
             painter = painterResource(id = R.drawable.fondo_secundario),
             contentDescription = null,
@@ -149,7 +149,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 3) Contenido, respetando las barras del sistema
+
         Box(
             modifier = Modifier
                 .fillMaxSize()

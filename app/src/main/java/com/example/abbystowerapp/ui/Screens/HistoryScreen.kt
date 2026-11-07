@@ -172,16 +172,15 @@ private fun BandaHistoria() {
         Text(
             text = "HISTORIA",
             color = Color(0xFFE9C766),
-            fontFamily = FontFamily.Serif,   // luego Cinzel
+            fontFamily = FontFamily.Serif,
             fontSize = 26.sp
         )
     }
 }
 
-private val PapelHoja = Color(0xFFF8E5BF)   // color del papel del libro
+private val PapelHoja = Color(0xFFF8E5BF)
 
-/** Libro fijo con efecto de voltear la hoja derecha sobre el lomo. */
-/** Libro fijo con efecto de voltear la hoja derecha sobre el lomo. */
+
 @Composable
 private fun LibroConPaginas() {
     val libro = ImageBitmap.imageResource(R.drawable.libro)
@@ -193,12 +192,11 @@ private fun LibroConPaginas() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .aspectRatio(1.5f)      // proporción del PNG del libro (1536 x 1024)
+            .aspectRatio(1.5f)
     ) {
         val ancho = maxWidth
         val alto = maxHeight
 
-        // 1) El libro, siempre igual
         Image(
             bitmap = libro,
             contentDescription = null,
@@ -207,7 +205,7 @@ private fun LibroConPaginas() {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Posición continua del deslizamiento: base = página actual, t = avance del volteo (0..1)
+
         val pos = (pagerState.currentPage + pagerState.currentPageOffsetFraction)
             .coerceIn(0f, ultima.toFloat())
         val base = floor(pos).toInt().coerceIn(0, ultima)
@@ -215,7 +213,7 @@ private fun LibroConPaginas() {
         val siguiente = (base + 1).coerceAtMost(ultima)
         val brillo = sin(PI * t).toFloat().coerceIn(0f, 1f)
 
-        // 2) Hoja izquierda (quieta): del 21% al 47% del ancho, del 15% al 72% del alto
+
         Box(
             modifier = Modifier
                 .offset(x = ancho * 0.21f, y = alto * 0.15f)
@@ -224,7 +222,7 @@ private fun LibroConPaginas() {
             TextoPagina(paginas[base].izquierda)
         }
 
-        // 3) Hoja derecha de abajo (se descubre al voltear): del 57% al 86%
+
         Box(
             modifier = Modifier
                 .offset(x = ancho * 0.57f, y = alto * 0.15f)
@@ -233,7 +231,7 @@ private fun LibroConPaginas() {
             TextoPagina(paginas[siguiente].derecha)
         }
 
-        // 4) Hoja que se voltea: va del lomo (50%) al 88% y gira alrededor del lomo
+
         Box(
             modifier = Modifier
                 .offset(x = ancho * 0.50f, y = alto * 0.10f)
@@ -246,7 +244,6 @@ private fun LibroConPaginas() {
                 .background(PapelHoja.copy(alpha = brillo))
         ) {
             if (t < 0.5f) {
-                // Frente: la misma posición del texto derecho (57%..86%)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -260,7 +257,7 @@ private fun LibroConPaginas() {
                     TextoPagina(paginas[base].derecha)
                 }
             } else {
-                // Reverso: cae sobre la hoja izquierda (21%..47%), reflejado para leerse bien
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -276,7 +273,7 @@ private fun LibroConPaginas() {
                     }
                 }
             }
-            // Sombra mientras la hoja está en movimiento
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -284,7 +281,7 @@ private fun LibroConPaginas() {
             )
         }
 
-        // 5) Carrusel invisible encima: solo recibe el deslizamiento del dedo
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()

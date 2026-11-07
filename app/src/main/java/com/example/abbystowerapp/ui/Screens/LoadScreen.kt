@@ -26,11 +26,9 @@ import com.example.abbystowerapp.R
 import com.example.abbystowerapp.ui.theme.AbbysTowerAppTheme
 import kotlinx.coroutines.delay
 
-// Qué tanto se ve cada imagen (0f = invisible, 1f = totalmente visible)
 private const val PRINCIPAL_ALPHA = 0.8f
 private const val SECUNDARIO_ALPHA = 0.6f
 
-// Degradado de Figma: color + opacidad en cada punto (ARGB)
 private val GradientBrush = Brush.verticalGradient(
     colorStops = arrayOf(
         0.0f to Color(0x00101746),
@@ -49,16 +47,15 @@ fun LoadScreen(onFinished: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF05091F))   // 1) color base
+            .background(Color(0xFF05091F))
     ) {
-        // 2) Degradado de Figma
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(GradientBrush)
         )
 
-        // 3) Cielo con estrellas
         Image(
             painter = painterResource(id = R.drawable.fondo_principal),
             contentDescription = null,
@@ -67,7 +64,6 @@ fun LoadScreen(onFinished: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // 4) Humo morado encima
         Image(
             painter = painterResource(id = R.drawable.fondo_secundario),
             contentDescription = null,
@@ -76,7 +72,6 @@ fun LoadScreen(onFinished: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // 5) Contenido: logo y debajo el marco con texto
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,

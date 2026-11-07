@@ -1,6 +1,5 @@
 package com.example.abbystowerapp.ui.Screens
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,8 +41,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.Lucide
+import com.example.abbystowerapp.Data.PersonajesRepository
+import com.example.abbystowerapp.Model.Filtro
+import com.example.abbystowerapp.Model.aplicar
 import com.example.abbystowerapp.R
 import com.example.abbystowerapp.ui.components.CardCharacters
+import com.example.abbystowerapp.ui.components.FiltroDialog
 import com.example.abbystowerapp.ui.theme.AbbysTowerAppTheme
 
 private val Gold = Color(0xFFF2B705)
@@ -51,22 +54,16 @@ private val GoldSoft = Color(0xFFC9A04A)
 private val BackgroundColor = Color(0xFF0B0719)
 private const val BACKGROUND_IMAGE_ALPHA = 0.5f
 
-private data class CharacterItem(val name: String, @DrawableRes val image: Int)
-
-// Datos de prueba: luego los reemplazas por los reales
-private val sampleCharacters = List(8) {
-    CharacterItem("Nombre Personaje", R.drawable.monster_down)
-}
-
 @Composable
 fun CharactersScreen(
     onBack: () -> Unit,
-    onFilterClick: () -> Unit = {}
+    onCharacterClick: (Int) -> Unit = {}
 ) {
     var query by remember { mutableStateOf("") }
-    val characters = sampleCharacters.filter {
-        it.name.contains(query, ignoreCase = true)
-    }
+    var filtro by remember { mutableStateOf(Filtro()) }
+    var mostrarFiltro by remember { mutableStateOf(false) }
+
+    val characters = PersonajesRepository.personajes.aplicar(filtro, query)
 
     Box(
         modifier = Modifier
@@ -132,24 +129,46 @@ fun CharactersScreen(
                     onValueChange = { query = it },
                     modifier = Modifier.weight(1f)
                 )
-                FilterButton(onClick = onFilterClick)
+                FilterButton(
+                    activo = filtro.activo,
+                    onClick = { mostrarFiltro = true }
+                )
             }
 
-            // Grid de cards
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(characters) { character ->
-                    CardCharacters(
-                        name = character.name,
-                        imageRes = character.image
-                    )
+            // Resultados
+            if (characters.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Sin resultados", color = GoldSoft, fontSize = 16.sp)
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(characters, key = { it.id }) { character ->
+                        CardCharacters(
+                            name = character.nombre,
+                            imageRes = character.imagen,
+                            onClick = { onCharacterClick(character.id) }
+                        )
+                    }
                 }
             }
+        }
+
+        // 4) Ventana de filtros
+        if (mostrarFiltro) {
+            FiltroDialog(
+                filtroActual = filtro,
+                onAplicar = {
+                    filtro = it
+                    mostrarFiltro = false
+                },
+                onCerrar = { mostrarFiltro = false }
+            )
         }
     }
 }
@@ -194,19 +213,19 @@ private fun SearchField(
 }
 
 @Composable
-private fun FilterButton(onClick: () -> Unit) {
+private fun FilterButton(activo: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .width(104.dp)
             .height(40.dp)
-            .background(Color(0x33000000))
+            .background(if (activo) Color(0x66F2B705) else Color(0x33000000))
             .border(2.dp, Gold)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Filtrar",
-            color = GoldSoft,
+            text = if (activo) "Filtrar ●" else "Filtrar",
+            color = if (activo) Gold else GoldSoft,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold
         )

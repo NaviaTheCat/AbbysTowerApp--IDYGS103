@@ -8,5 +8,15 @@ package com.example.abbystowerapp.Model
  * All rights reserved: 2026
  */
 
-class Personajes {
-}
+
+import androidx.annotation.DrawableRes
+
+data class Personaje(
+    val id: Int,
+    val nombre: String,
+    val vida: Int,
+    val ataque: Int,
+    val defensa: Int,
+    val descripcion: String,
+    @DrawableRes val imagen: Int
+)

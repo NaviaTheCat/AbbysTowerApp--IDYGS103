@@ -52,6 +52,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.abbystowerapp.ui.theme.AbbysTowerAppTheme
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.example.abbystowerapp.Data.PersonajesRepository
 
 private val Gold = Color(0xFFF2B705)
 private val GoldSoft = Color(0xFFC9A04A)
@@ -62,7 +64,6 @@ private val ScreenBackground = Brush.verticalGradient(
     listOf(Color(0xFF2A0B3D), Color(0xFF0B0314))
 )
 
-// Degradado de Figma: 51136D (0%) -> 2B0A3A (91%)
 private val FrameGradient = Brush.verticalGradient(
     colorStops = arrayOf(
         0.00f to Color(0xFF51136D),
@@ -71,10 +72,6 @@ private val FrameGradient = Brush.verticalGradient(
     )
 )
 
-/**
- * Marco dibujado en 9 partes: las esquinas mantienen su tamaño (cornerSize)
- * y solo se estiran los lados, así no se deforma sin importar el tamaño.
- */
 @Composable
 private fun PixelFrame(
     modifier: Modifier = Modifier,
@@ -90,8 +87,8 @@ private fun PixelFrame(
             .drawBehind {
                 val iw = image.width
                 val ih = image.height
-                val c = (iw * 0.19f).toInt()      // esquina dentro del PNG original
-                val d = cornerSize.roundToPx()    // esquina en pantalla
+                val c = (iw * 0.19f).toInt()
+                val d = cornerSize.roundToPx()
                 val w = size.width.toInt()
                 val h = size.height.toInt()
 
@@ -104,8 +101,6 @@ private fun PixelFrame(
                         size = Size(size.width - 2 * inset, size.height - 2 * inset)
                     )
                 }
-
-                // 2) Las 8 piezas del marco (el centro está vacío)
                 val sx = intArrayOf(0, c, iw - c, iw)
                 val sy = intArrayOf(0, c, ih - c, ih)
                 val dx = intArrayOf(0, d, w - d, w)
@@ -132,7 +127,6 @@ private fun PixelFrame(
 
 private val HomeBackgroundColor = Color(0xFF0B0719)
 
-// Qué tanto se ve la imagen sobre el color (0f = solo color, 1f = solo imagen)
 private const val BACKGROUND_IMAGE_ALPHA = 0.5f
 
 @Composable
@@ -222,7 +216,6 @@ fun HomeScreen(
         }
     }
 }
-// Marco pequeño: el mismo marco, esquinas más chicas, alto según el contenido
 @Composable
 private fun TitleCard() {
     PixelFrame(

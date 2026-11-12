@@ -1,5 +1,5 @@
 package com.example.abbystowerapp.ui.Screens
-
+import coil.compose.AsyncImage
 /**
  * Project: AbbysTowerApp
  * From: com.example.abbystowerapp.ui.Screens
@@ -57,6 +57,14 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import com.example.abbystowerapp.Data.FavoritosStore
+import kotlinx.coroutines.launch
 
 private val Gold = Color(0xFFF2B705)
 private val GoldSoft = Color(0xFFC9A04A)
@@ -124,6 +132,7 @@ private fun DetailContent(personaje: Personaje) {
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Aureola(personaje)
+        BotonFavorito(personaje.id)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -153,7 +162,7 @@ private fun DetailContent(personaje: Personaje) {
                 text = personaje.descripcion,
                 color = GoldSoft,
                 fontFamily = FontFamily.Serif,
-                fontSize = 12.sp,
+                fontSize = 16.sp,
                 lineHeight = 17.sp,
                 textAlign = TextAlign.Justify
             )
@@ -166,7 +175,6 @@ private fun DetailContent(personaje: Personaje) {
 @Composable
 private fun Aureola(personaje: Personaje) {
     val aureola = ImageBitmap.imageResource(R.drawable.marco_personaje)
-    val imagen = ImageBitmap.imageResource(personaje.imagen)
 
     Box(
         modifier = Modifier
@@ -174,11 +182,13 @@ private fun Aureola(personaje: Personaje) {
             .aspectRatio(1f),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            bitmap = imagen,
+        AsyncImage(
+            model = personaje.imagen,
             contentDescription = personaje.nombre,
             contentScale = ContentScale.Fit,
             filterQuality = FilterQuality.None,
+            placeholder = painterResource(R.drawable.monster_down),
+            error = painterResource(R.drawable.monster_down),
             modifier = Modifier.fillMaxSize(0.52f)
         )
         Image(
@@ -251,6 +261,34 @@ private fun StatNumber(value: Int, size: Int) {
             shadow = Shadow(Color(0xFF000000), Offset(3f, 5f), 6f)
         )
     )
+}
+
+@Composable
+private fun BotonFavorito(personajeId: Int) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val favoritos by remember { FavoritosStore.favoritos(context) }
+        .collectAsState(initial = emptySet())
+    val esFavorito = personajeId in favoritos
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .background(if (esFavorito) Color(0x66F2B705) else Color(0x33000000))
+            .border(2.dp, Gold)
+            .clickable {
+                scope.launch { FavoritosStore.alternar(context, personajeId) }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (esFavorito) "★ Quitar de favoritos" else "☆ Agregar a favoritos",
+            color = if (esFavorito) Gold else GoldSoft,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
 }
 
 @Preview(showBackground = true)

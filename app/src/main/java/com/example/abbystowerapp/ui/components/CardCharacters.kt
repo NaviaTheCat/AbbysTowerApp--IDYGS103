@@ -1,6 +1,5 @@
 package com.example.abbystowerapp.ui.components
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,30 +12,31 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import coil.compose.AsyncImage
 import com.example.abbystowerapp.R
 
 @Composable
 fun CardCharacters(
     name: String,
-    @DrawableRes imageRes: Int,
+    imageUrl: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     val frame = ImageBitmap.imageResource(R.drawable.marco_card)
-    val character = ImageBitmap.imageResource(imageRes)
 
     Box(
         modifier = modifier
@@ -65,17 +65,16 @@ fun CardCharacters(
                 }
         )
 
-
-        Image(
-            bitmap = character,
+        // Imagen del personaje desde la API
+        AsyncImage(
+            model = imageUrl,
             contentDescription = name,
             contentScale = ContentScale.Fit,
-            filterQuality = FilterQuality.None,
+            filterQuality = FilterQuality.None,   // mantiene el pixel art nítido
             modifier = Modifier
                 .matchParentSize()
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         )
-
 
         Box(
             modifier = Modifier
@@ -90,18 +89,16 @@ fun CardCharacters(
                 )
         )
 
-
         Text(
             text = name,
             color = Color.White,
-            fontSize = 11.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 14.dp)
         )
-
 
         Image(
             bitmap = frame,

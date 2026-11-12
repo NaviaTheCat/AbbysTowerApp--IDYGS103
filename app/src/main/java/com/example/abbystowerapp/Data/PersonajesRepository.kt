@@ -1,35 +1,28 @@
 package com.example.abbystowerapp.Data
 
-/**
- * Project: AbbysTowerApp
- * From: com.example.abbystowerapp.Data
- * Created by: riqui
- * On: 27/10/2026
- * All rights reserved: 2026
- */
-
-
+import com.example.abbystowerapp.Data.Remote.ApiClient
 import com.example.abbystowerapp.Model.Personaje
-import com.example.abbystowerapp.R
 
 object PersonajesRepository {
 
-    private const val DESCRIPCION_PRUEBA =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod " +
-                "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, " +
-                "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    private var cache: List<Personaje> = emptyList()
 
-    val personajes: List<Personaje> = List(8) { i ->
-        Personaje(
-            id = i,
-            nombre = "Nombre Personaje",
-            vida = 20 + i,
-            ataque = 14 + i,
-            defensa = 8 + i,
-            descripcion = DESCRIPCION_PRUEBA,
-            imagen = R.drawable.monster_down
-        )
+    suspend fun obtener(): Result<List<Personaje>> = runCatching {
+        val resp = ApiClient.api.getPersonajes()
+        if (!resp.succeded) error(resp.message ?: "Error en la API")
+
+        resp.result.orEmpty().map {
+            Personaje(
+                id = it.idCharacter,
+                nombre = it.nombre,
+                vida = it.vida,
+                ataque = it.ataque,
+                defensa = it.defensa,
+                descripcion = it.descripcion,
+                imagen = ApiClient.BASE_URL.trimEnd('/') + it.imagen
+            )
+        }.also { cache = it }
     }
 
-    fun porId(id: Int): Personaje? = personajes.firstOrNull { it.id == id }
+    fun porId(id: Int): Personaje? = cache.firstOrNull { it.id == id }
 }

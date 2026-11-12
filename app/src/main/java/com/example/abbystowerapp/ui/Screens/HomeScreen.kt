@@ -49,11 +49,10 @@ import com.composables.icons.lucide.Scroll
 import com.composables.icons.lucide.Swords
 import com.example.abbystowerapp.R
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.abbystowerapp.ui.theme.AbbysTowerAppTheme
-import androidx.compose.foundation.layout.fillMaxHeight
-import com.example.abbystowerapp.Data.PersonajesRepository
 
 private val Gold = Color(0xFFF2B705)
 private val GoldSoft = Color(0xFFC9A04A)
@@ -64,6 +63,7 @@ private val ScreenBackground = Brush.verticalGradient(
     listOf(Color(0xFF2A0B3D), Color(0xFF0B0314))
 )
 
+// Degradado de Figma: 51136D (0%) -> 2B0A3A (91%)
 private val FrameGradient = Brush.verticalGradient(
     colorStops = arrayOf(
         0.00f to Color(0xFF51136D),
@@ -72,6 +72,10 @@ private val FrameGradient = Brush.verticalGradient(
     )
 )
 
+/**
+ * Marco dibujado en 9 partes: las esquinas mantienen su tamaño (cornerSize)
+ * y solo se estiran los lados, así no se deforma sin importar el tamaño.
+ */
 @Composable
 private fun PixelFrame(
     modifier: Modifier = Modifier,
@@ -87,12 +91,12 @@ private fun PixelFrame(
             .drawBehind {
                 val iw = image.width
                 val ih = image.height
-                val c = (iw * 0.19f).toInt()
-                val d = cornerSize.roundToPx()
+                val c = (iw * 0.19f).toInt()      // esquina dentro del PNG original
+                val d = cornerSize.roundToPx()    // esquina en pantalla
                 val w = size.width.toInt()
                 val h = size.height.toInt()
 
-
+                // 1) Fondo/degradado solo dentro del hueco del marco
                 if (innerBrush != null) {
                     val inset = d * 0.6f
                     drawRect(
@@ -101,6 +105,8 @@ private fun PixelFrame(
                         size = Size(size.width - 2 * inset, size.height - 2 * inset)
                     )
                 }
+
+                // 2) Las 8 piezas del marco (el centro está vacío)
                 val sx = intArrayOf(0, c, iw - c, iw)
                 val sy = intArrayOf(0, c, ih - c, ih)
                 val dx = intArrayOf(0, d, w - d, w)
@@ -115,7 +121,7 @@ private fun PixelFrame(
                             srcSize = IntSize(sx[i + 1] - sx[i], sy[j + 1] - sy[j]),
                             dstOffset = IntOffset(dx[i], dy[j]),
                             dstSize = IntSize(dx[i + 1] - dx[i], dy[j + 1] - dy[j]),
-                            filterQuality = FilterQuality.None
+                            filterQuality = FilterQuality.None   // pixel art nítido
                         )
                     }
                 }
@@ -127,6 +133,7 @@ private fun PixelFrame(
 
 private val HomeBackgroundColor = Color(0xFF0B0719)
 
+// Qué tanto se ve la imagen sobre el color (0f = solo color, 1f = solo imagen)
 private const val BACKGROUND_IMAGE_ALPHA = 0.5f
 
 @Composable
@@ -138,9 +145,9 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(HomeBackgroundColor)
+            .background(HomeBackgroundColor)          // 1) color base
     ) {
-
+        // 2) Imagen de fondo, de borde a borde
         Image(
             painter = painterResource(id = R.drawable.fondo_secundario),
             contentDescription = null,
@@ -149,7 +156,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-
+        // 3) Contenido, respetando las barras del sistema
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -159,8 +166,8 @@ fun HomeScreen(
         ) {
             PixelFrame(
                 modifier = Modifier
-                    .fillMaxWidth(0.94f)
-                    .aspectRatio(2f / 3f),
+                    .fillMaxWidth(0.97f)      // casi todo el ancho
+                    .fillMaxHeight(0.95f),    // casi todo el alto (antes: aspectRatio(2f / 3f))
                 cornerSize = 56.dp,
                 contentPadding = PaddingValues(horizontal = 46.dp, vertical = 42.dp),
                 innerBrush = FrameGradient
@@ -216,6 +223,7 @@ fun HomeScreen(
         }
     }
 }
+// Marco pequeño: el mismo marco, esquinas más chicas, alto según el contenido
 @Composable
 private fun TitleCard() {
     PixelFrame(

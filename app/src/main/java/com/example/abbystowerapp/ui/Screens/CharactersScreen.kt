@@ -20,9 +20,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -39,15 +42,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.Lucide
-import com.example.abbystowerapp.Data.PersonajesRepository
+import com.example.abbystowerapp.Data.FavoritosStore
 import com.example.abbystowerapp.Model.Filtro
+import com.example.abbystowerapp.Model.Personaje
 import com.example.abbystowerapp.Model.aplicar
 import com.example.abbystowerapp.R
 import com.example.abbystowerapp.ui.components.CardCharacters
 import com.example.abbystowerapp.ui.components.FiltroDialog
 import com.example.abbystowerapp.ui.theme.AbbysTowerAppTheme
+import com.example.abbystowerapp.ui.viewmodel.PersonajesUiState
+import com.example.abbystowerapp.ui.viewmodel.PersonajesViewModel
 
 private val Gold = Color(0xFFF2B705)
 private val GoldSoft = Color(0xFFC9A04A)
@@ -57,13 +64,30 @@ private const val BACKGROUND_IMAGE_ALPHA = 0.5f
 @Composable
 fun CharactersScreen(
     onBack: () -> Unit,
-    onCharacterClick: (Int) -> Unit = {}
+    onCharacterClick: (Int) -> Unit = {},
+    viewModel: PersonajesViewModel = viewModel()
+) {
+    CharactersContent(
+        state = viewModel.state,
+        onRetry = viewModel::cargar,
+        onBack = onBack,
+        onCharacterClick = onCharacterClick
+    )
+}
+
+@Composable
+fun CharactersContent(
+    state: PersonajesUiState,
+    onRetry: () -> Unit,
+    onBack: () -> Unit,
+    onCharacterClick: (Int) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var filtro by remember { mutableStateOf(Filtro()) }
     var mostrarFiltro by remember { mutableStateOf(false) }
-
-    val characters = PersonajesRepository.personajes.aplicar(filtro, query)
+    val context = LocalContext.current
+    val favoritos by remember { FavoritosStore.favoritos(context) }
+        .collectAsState(initial = emptySet())
 
     Box(
         modifier = Modifier
@@ -78,7 +102,6 @@ fun CharactersScreen(
             alpha = BACKGROUND_IMAGE_ALPHA,
             modifier = Modifier.fillMaxSize()
         )
-
 
         Column(
             modifier = Modifier
@@ -111,11 +134,10 @@ fun CharactersScreen(
                 Text(
                     text = "Personajes",
                     color = GoldSoft,
-                    fontFamily = FontFamily.Serif,   // luego Cinzel
+                    fontFamily = FontFamily.Serif,
                     fontSize = 28.sp
                 )
             }
-
 
             Row(
                 modifier = Modifier
@@ -135,29 +157,59 @@ fun CharactersScreen(
                 )
             }
 
-            if (characters.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Sin resultados", color = GoldSoft, fontSize = 16.sp)
+            when (state) {
+                is PersonajesUiState.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Gold)
+                    }
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(characters, key = { it.id }) { character ->
-                        CardCharacters(
-                            name = character.nombre,
-                            imageRes = character.imagen,
-                            onClick = { onCharacterClick(character.id) }
-                        )
+
+                is PersonajesUiState.Error -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(state.mensaje, color = GoldSoft, fontSize = 16.sp)
+                            Text(
+                                text = "Reintentar",
+                                color = Gold,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable(onClick = onRetry)
+                                    .padding(12.dp)
+                            )
+                        }
+                    }
+                }
+
+                is PersonajesUiState.Success -> {
+                    val characters = state.personajes
+                        .aplicar(filtro, query)
+                        .sortedByDescending { it.id in favoritos }
+
+                    if (characters.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Sin resultados", color = GoldSoft, fontSize = 16.sp)
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(characters, key = { it.id }) { character ->
+                                CardCharacters(
+                                    name = if (character.id in favoritos) "★ ${character.nombre}" else character.nombre,
+                                    imageUrl = character.imagen,
+                                    onClick = { onCharacterClick(character.id) }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-
 
         if (mostrarFiltro) {
             FiltroDialog(
@@ -235,6 +287,15 @@ private fun FilterButton(activo: Boolean, onClick: () -> Unit) {
 @Composable
 fun CharactersScreenPreview() {
     AbbysTowerAppTheme {
-        CharactersScreen(onBack = {})
+        CharactersContent(
+            state = PersonajesUiState.Success(
+                listOf(
+                    Personaje(1, "Aby", 10, 4, 2, "Descripción de prueba", "")
+                )
+            ),
+            onRetry = {},
+            onBack = {},
+            onCharacterClick = {}
+        )
     }
 }

@@ -71,14 +71,54 @@ private val TextoLibro = Color(0xFF2A1A0A)
 private const val BACKGROUND_IMAGE_ALPHA = 0.5f
 
 
-private data class PaginaLibro(val izquierda: String, val derecha: String)
+private val TituloLibro = Color(0xFF7A1F12)
 
-private val paginas = List(5) {
+// Cada elemento es una doble página del libro: el título del acto va arriba
+// de la hoja izquierda. Mantén cada texto en ~75 caracteres o menos para que
+// quepa en la hoja en teléfonos angostos.
+private data class PaginaLibro(
+    val titulo: String,
+    val izquierda: String,
+    val derecha: String
+)
+
+private val paginas = listOf(
     PaginaLibro(
-        izquierda = "Nuevos enemigos por descubrir y mejor equipamento",
-        derecha = "Nuevos enemigos por descubrir y mejor equipamento"
+        titulo = "Prólogo",
+        izquierda = "2035. Dante y la expedición del capitán Vargas llegan al piso 20.",
+        derecha = "Una criatura enorme los alcanza. Oscuridad. La expedición nunca regresó."
+    ),
+    PaginaLibro(
+        titulo = "La despedida",
+        izquierda = "Antes de partir, Abby le dio a Dante el colgante de su padre.",
+        derecha = "«Me lo devuelves cuando vuelvas.»"
+    ),
+    PaginaLibro(
+        titulo = "La entrada",
+        izquierda = "Tres meses después. A las dos semanas dejaron de buscar a la expedición.",
+        derecha = "«Nadie va a entrar por él. Entonces entro yo.»"
+    ),
+    PaginaLibro(
+        titulo = "El ascenso",
+        izquierda = "Abby sube siguiendo las hojas del diario de Dante.",
+        derecha = "Piso 4: huellas de botas que regresan. De una sola persona."
+    ),
+    PaginaLibro(
+        titulo = "Rastros",
+        izquierda = "Piso 5: una mano negra marcada en el cristal.",
+        derecha = "Piso 7: una fogata. Una sola manta."
+    ),
+    PaginaLibro(
+        titulo = "La cima",
+        izquierda = "En la cima se acaban las huellas. Algo la espera.",
+        derecha = "La Sombra. Y pelea con su mismo combo."
+    ),
+    PaginaLibro(
+        titulo = "Final",
+        izquierda = "La Sombra cae. Abby reconoce el colgante: «Era de papá. Yo te lo di.»",
+        derecha = "Dante venía de regreso todo ese tiempo. «Volví.» Continuará…"
     )
-}
+)
 
 @Composable
 fun HistoryScreen(onBack: () -> Unit) {
@@ -218,8 +258,10 @@ private fun LibroConPaginas() {
             modifier = Modifier
                 .offset(x = ancho * 0.21f, y = alto * 0.15f)
                 .size(width = ancho * 0.26f, height = alto * 0.57f)
+                // Se desvanece cuando la hoja que gira cae encima con el texto nuevo
+                .graphicsLayer { alpha = (2f - 2f * t).coerceIn(0f, 1f) }
         ) {
-            TextoPagina(paginas[base].izquierda)
+            TextoPagina(paginas[base].izquierda, paginas[base].titulo)
         }
 
 
@@ -227,6 +269,9 @@ private fun LibroConPaginas() {
             modifier = Modifier
                 .offset(x = ancho * 0.57f, y = alto * 0.15f)
                 .size(width = ancho * 0.29f, height = alto * 0.57f)
+                // Invisible en reposo (ahí el texto lo pinta la hoja de encima);
+                // aparece conforme la hoja se levanta
+                .graphicsLayer { alpha = (2f * t).coerceIn(0f, 1f) }
         ) {
             TextoPagina(paginas[siguiente].derecha)
         }
@@ -269,7 +314,7 @@ private fun LibroConPaginas() {
                         )
                 ) {
                     Box(Modifier.fillMaxSize().graphicsLayer { scaleX = -1f }) {
-                        TextoPagina(paginas[siguiente].izquierda)
+                        TextoPagina(paginas[siguiente].izquierda, paginas[siguiente].titulo)
                     }
                 }
             }
@@ -314,16 +359,30 @@ private fun LibroConPaginas() {
 }
 
 @Composable
-private fun TextoPagina(texto: String) {
-    Text(
-        text = texto,
-        color = TextoLibro,
-        fontWeight = FontWeight.Bold,
-        fontSize = 14.sp,
-        lineHeight = 19.sp,
-        textAlign = TextAlign.Start,
-        modifier = Modifier.fillMaxSize()
-    )
+private fun TextoPagina(texto: String, titulo: String? = null) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (titulo != null) {
+            Text(
+                text = titulo.uppercase(),
+                color = TituloLibro,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                lineHeight = 13.sp,
+                maxLines = 1
+            )
+            Spacer(Modifier.height(3.dp))
+        }
+        Text(
+            text = texto,
+            color = TextoLibro,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp,
+            lineHeight = 14.sp,
+            textAlign = TextAlign.Start
+        )
+    }
 }
 
 @Preview(showBackground = true)
